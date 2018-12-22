@@ -230,7 +230,7 @@ def update_save_asset_dir(self, context):
     yaam.set_save_asset_dir(context.scene.save_asset_dir)
     return None
 
-class AST_OT_AddToFav(Operator):
+class YAAM_OT_AddToFav(Operator):
     bl_idname = "ast.add_to_fav"
     bl_label = "Add to favorites"
     bl_description = "Add the current folder to the favorites"
@@ -240,7 +240,7 @@ class AST_OT_AddToFav(Operator):
         yaam.set_favs(scn.assets_dir)
         return {'FINISHED'}
 
-class AST_OT_RmFromFav(Operator):
+class YAAM_OT_RmFromFav(Operator):
     bl_idname = "ast.remove_from_fav"
     bl_label = "Remove from favorites"
     bl_description = "Remove the current folder from the favorites"
@@ -274,7 +274,7 @@ class AST_OT_RmFromFav(Operator):
 # attempt to import the selected item from the blend file
 #
 
-class AST_MT_blend_append_menu(Menu):
+class YAAM_MT_blend_append_menu(Menu):
     bl_idname = "ast.blend_append"
     bl_label = "Append"
     bl_description = "Append from a blend library"
@@ -289,7 +289,7 @@ class AST_MT_blend_append_menu(Menu):
         layout.operator("astBlend.append_textures")
         layout.operator("astBlend.append_scenes")
 
-class AST_MT_blend_link_menu(Menu):
+class YAAM_MT_blend_link_menu(Menu):
     bl_idname = "ast.blend_link"
     bl_label = "Link"
     bl_description = "Link from a blend library"
@@ -344,7 +344,7 @@ def invoke_general(self, context, event):
     wm.invoke_props_dialog(self)
     return {'RUNNING_MODAL'}
 
-class AST_OT_AppendCollections(Operator):
+class YAAM_OT_AppendCollections(Operator):
     bl_idname = "astblend.append_collections"
     bl_label = "Append Collections"
     bl_description = "Append collections from a blend library"
@@ -395,7 +395,7 @@ class AST_OT_AppendCollections(Operator):
                         self.report({'ERROR'}, str(e))
         return {'FINISHED'}
 
-class AST_OT_AppendMaterials(Operator):
+class YAAM_OT_AppendMaterials(Operator):
     bl_idname = "astblend.append_materials"
     bl_label = "Append Materials"
     bl_description = "Append materials from a blend library"
@@ -447,7 +447,7 @@ class AST_OT_AppendMaterials(Operator):
                         self.report({'ERROR'}, str(e))
         return {'FINISHED'}
 
-class AST_OT_AppendObjects(Operator):
+class YAAM_OT_AppendObjects(Operator):
     bl_idname = "astblend.append_objects"
     bl_label = "Append Objects"
     bl_description = "Append objects from a blend library"
@@ -499,7 +499,7 @@ class AST_OT_AppendObjects(Operator):
                         self.report({'ERROR'}, str(e))
         return {'FINISHED'}
 
-class AST_OT_AppendTextures(Operator):
+class YAAM_OT_AppendTextures(Operator):
     bl_idname = "astblend.append_textures"
     bl_label = "Append Textures"
     bl_description = "Append a collection from a blend library"
@@ -551,7 +551,7 @@ class AST_OT_AppendTextures(Operator):
                         self.report({'ERROR'}, str(e))
         return {'FINISHED'}
 
-class AST_OT_AppendScenes(Operator):
+class YAAM_OT_AppendScenes(Operator):
     bl_idname = "astblend.append_scenes"
     bl_label = "Append Scenes"
     bl_description = "Append a collection from a blend library"
@@ -603,7 +603,7 @@ class AST_OT_AppendScenes(Operator):
                         self.report({'ERROR'}, str(e))
         return {'FINISHED'}
 
-class AST_OT_import_ext(Operator):
+class YAAM_OT_import_ext(Operator):
     bl_idname = "ast.import_ext"
     bl_label = "Import"
     bl_description = "Import external format"
@@ -674,7 +674,7 @@ class AST_OT_import_ext(Operator):
             self.report({'ERROR'}, "Unsupported File Format")
         return {'FINISHED'}
 
-class AST_OT_add_asset(Operator):
+class YAAM_OT_add_asset(Operator):
     bl_idname = "ast.add_asset"
     bl_label = "Add"
     bl_description = "Add asset to selected Category"
@@ -758,7 +758,7 @@ class AST_OT_add_asset(Operator):
         yaam.set_previous_assets_directory("")
         return {'FINISHED'}
 
-class AST_OT_rm_asset(Operator):
+class YAAM_OT_rm_asset(Operator):
     bl_idname = "ast.rm_asset"
     bl_label = "Remove"
     bl_description = "Remove asset from selected Category"
@@ -786,7 +786,7 @@ class AST_OT_rm_asset(Operator):
             self.report({'INFO'}, "Failed to remove Asset")
         return {'FINISHED'}
 
-class AST_OT_refresh_asset(Operator):
+class YAAM_OT_refresh_asset(Operator):
     bl_idname = "ast.refresh_asset"
     bl_label = "Refresh"
     bl_description = "Refresh assets"
@@ -853,7 +853,7 @@ class AssetTypes(bpy.types.PropertyGroup):
         update=asset_type_handler
     )
 
-class AST_OT_organize(Operator):
+class YAAM_OT_organize(Operator):
     bl_idname = "yaam_gen.organize"
     bl_label = "Organize"
     bl_description = "Organize assets"
@@ -875,7 +875,7 @@ class AST_OT_organize(Operator):
             yaam.set_previous_assets_directory("")
         return {'FINISHED'}
 
-class AST_PT_astGen(Panel):
+class YAAM_PT_astGen(Panel):
     bl_label = "YAAM Organize"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
@@ -896,7 +896,7 @@ class AST_PT_astGen(Panel):
         col.operator('yaam_gen.organize', icon = 'ASSET_MANAGER')
 
 # N Panels
-class AST_PT_astMgr(Panel):
+class YAAM_PT_astMgr(Panel):
     bl_label = "YAAM"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
@@ -971,22 +971,22 @@ class AST_PT_astMgr(Panel):
             col.prop(scn, "save_asset_name", text='')
 
 classes = [
-    AST_PT_astMgr,
-    AST_PT_astGen,
-    AST_OT_organize,
-    AST_MT_blend_link_menu,
-    AST_MT_blend_append_menu,
-    AST_OT_AppendCollections,
-    AST_OT_AppendMaterials,
-    AST_OT_AppendObjects,
-    AST_OT_AppendTextures,
-    AST_OT_AppendScenes,
-    AST_OT_import_ext,
-    AST_OT_add_asset,
-    AST_OT_rm_asset,
-    AST_OT_refresh_asset,
-    AST_OT_AddToFav,
-    AST_OT_RmFromFav,
+    YAAM_PT_astMgr,
+    YAAM_PT_astGen,
+    YAAM_OT_organize,
+    YAAM_MT_blend_link_menu,
+    YAAM_MT_blend_append_menu,
+    YAAM_OT_AppendCollections,
+    YAAM_OT_AppendMaterials,
+    YAAM_OT_AppendObjects,
+    YAAM_OT_AppendTextures,
+    YAAM_OT_AppendScenes,
+    YAAM_OT_import_ext,
+    YAAM_OT_add_asset,
+    YAAM_OT_rm_asset,
+    YAAM_OT_refresh_asset,
+    YAAM_OT_AddToFav,
+    YAAM_OT_RmFromFav,
     AstMgrMode,
     AssetTypes,
 ]
