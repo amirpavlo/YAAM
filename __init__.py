@@ -231,7 +231,7 @@ def update_save_asset_dir(self, context):
     return None
 
 class YAAM_OT_AddToFav(Operator):
-    bl_idname = "ast.add_to_fav"
+    bl_idname = "yaam.add_to_fav"
     bl_label = "Add to favorites"
     bl_description = "Add the current folder to the favorites"
 
@@ -241,7 +241,7 @@ class YAAM_OT_AddToFav(Operator):
         return {'FINISHED'}
 
 class YAAM_OT_RmFromFav(Operator):
-    bl_idname = "ast.remove_from_fav"
+    bl_idname = "yaam.remove_from_fav"
     bl_label = "Remove from favorites"
     bl_description = "Remove the current folder from the favorites"
 
@@ -275,7 +275,7 @@ class YAAM_OT_RmFromFav(Operator):
 #
 
 class YAAM_MT_blend_append_menu(Menu):
-    bl_idname = "ast.blend_append"
+    bl_idname = "yaam.blend_append"
     bl_label = "Append"
     bl_description = "Append from a blend library"
 
@@ -290,7 +290,7 @@ class YAAM_MT_blend_append_menu(Menu):
         layout.operator("astBlend.append_scenes")
 
 class YAAM_MT_blend_link_menu(Menu):
-    bl_idname = "ast.blend_link"
+    bl_idname = "yaam.blend_link"
     bl_label = "Link"
     bl_description = "Link from a blend library"
 
@@ -604,7 +604,7 @@ class YAAM_OT_AppendScenes(Operator):
         return {'FINISHED'}
 
 class YAAM_OT_import_ext(Operator):
-    bl_idname = "ast.import_ext"
+    bl_idname = "yaam.import_ext"
     bl_label = "Import"
     bl_description = "Import external format"
 
@@ -675,7 +675,7 @@ class YAAM_OT_import_ext(Operator):
         return {'FINISHED'}
 
 class YAAM_OT_add_asset(Operator):
-    bl_idname = "ast.add_asset"
+    bl_idname = "yaam.add_asset"
     bl_label = "Add"
     bl_description = "Add asset to selected Category"
 
@@ -759,7 +759,7 @@ class YAAM_OT_add_asset(Operator):
         return {'FINISHED'}
 
 class YAAM_OT_rm_asset(Operator):
-    bl_idname = "ast.rm_asset"
+    bl_idname = "yaam.rm_asset"
     bl_label = "Remove"
     bl_description = "Remove asset from selected Category"
 
@@ -787,7 +787,7 @@ class YAAM_OT_rm_asset(Operator):
         return {'FINISHED'}
 
 class YAAM_OT_refresh_asset(Operator):
-    bl_idname = "ast.refresh_asset"
+    bl_idname = "yaam.refresh_asset"
     bl_label = "Refresh"
     bl_description = "Refresh assets"
 
@@ -935,9 +935,9 @@ class YAAM_PT_astMgr(Panel):
         directory = bpy.path.abspath(scn.assets_dir)
         if os.path.exists(directory):
             if not directory in yaam.get_favs():
-                row.operator("ast.add_to_fav", text='', icon='SOLO_ON')
+                row.operator("yaam.add_to_fav", text='', icon='SOLO_ON')
             else:
-                row.operator("ast.remove_from_fav", text='', icon='X')
+                row.operator("yaam.remove_from_fav", text='', icon='X')
         row.prop(scn, "assets_dir", text = '')
         col.label(text="Select Asset type:")
         col.prop(scn.asset_type_list, "asset_type_dropdown")
@@ -947,21 +947,21 @@ class YAAM_PT_astMgr(Panel):
         self.add_preview(wm, row)
         col = row.column(align=True)
         if yaam.get_cur_selected_asset_mode() == 'astmgrmode.mng_assets':
-                col.operator('ast.add_asset', text='', icon='ADD')
-                col.operator('ast.rm_asset', text='', icon='REMOVE')
+                col.operator('yaam.add_asset', text='', icon='ADD')
+                col.operator('yaam.rm_asset', text='', icon='REMOVE')
         else:
-                col.operator('ast.refresh_asset', text='', icon='FILE_REFRESH')
+                col.operator('yaam.refresh_asset', text='', icon='FILE_REFRESH')
         col.prop(scn, 'list_favorites', text='', icon='SOLO_OFF', icon_only=True)
 
         col = layout.column(align=True)
         row = col.row(align=False)
         if (yaam.get_cur_selected_asset_category() == 'asset.blend') and \
            (yaam.get_cur_selected_asset_mode() == 'astmgrmode.browse_assets'):
-            row.menu('ast.blend_link', icon = 'LINKED')
-            row.menu('ast.blend_append', icon = 'APPEND_BLEND')
+            row.menu('yaam.blend_link', icon = 'LINKED')
+            row.menu('yaam.blend_append', icon = 'APPEND_BLEND')
         elif (yaam.get_cur_selected_asset_category() != 'asset.blend') and \
              (yaam.get_cur_selected_asset_mode() == 'astmgrmode.browse_assets'):
-            row.operator('ast.import_ext', icon = 'IMPORT')
+            row.operator('yaam.import_ext', icon = 'IMPORT')
 
         if yaam.get_cur_selected_asset_mode() == 'astmgrmode.mng_assets':
             col.row(align=True)
