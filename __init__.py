@@ -853,7 +853,49 @@ class AssetTypes(bpy.types.PropertyGroup):
         update=asset_type_handler
     )
 
-# N Panel
+class AST_OT_organize(Operator):
+    bl_idname = "yaam_gen.organize"
+    bl_label = "Organize"
+    bl_description = "Organize assets"
+
+    def organize(self, src, dst):
+        return
+
+    def execute(self, context):
+        scn = context.scene
+        src = scn.yaam_gen_source_dir
+        dst = scn.yaam_gen_dest_dir
+
+        self.organize(src, dst)
+
+        # force an update by setting the previous assets directory to ''
+        # This way when we check it while building, we'll continue to build
+        # there by the filter taking effect
+        if dst == yaam.get_cur_assets_dir():
+            yaam.set_previous_assets_directory("")
+        return {'FINISHED'}
+
+class AST_PT_astGen(Panel):
+    bl_label = "YAAM Organize"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_category = 'YAAM Manager'
+    bl_options = {'DEFAULT_CLOSED'}
+
+    def draw(self, context):
+        scn = context.scene
+        layout = self.layout
+        wm = context.window_manager
+        col = layout.column(align=True)
+
+        col.label(text="Select source folder")
+        col.prop(scn, "yaam_gen_source_dir", text="")
+        col.label(text="Select destination folder")
+        col.prop(scn, "yaam_gen_dest_dir", text="")
+        col = layout.column(align=True)
+        col.operator('yaam_gen.organize', icon = 'ASSET_MANAGER')
+
+# N Panels
 class AST_PT_astMgr(Panel):
     bl_label = "YAAM"
     bl_space_type = "VIEW_3D"
@@ -930,6 +972,8 @@ class AST_PT_astMgr(Panel):
 
 classes = [
     AST_PT_astMgr,
+    AST_PT_astGen,
+    AST_OT_organize,
     AST_MT_blend_link_menu,
     AST_MT_blend_append_menu,
     AST_OT_AppendCollections,
@@ -1237,6 +1281,20 @@ def register():
         type=AstMgrMode)
     bpy.types.Scene.list_favorites = EnumProperty(name='Favorites', items=get_favs_enum,
                                                   update=handle_favs_update)
+
+    bpy.types.Scene.yaam_gen_source_dir = StringProperty(
+        name="YAAM org source dir",
+        subtype='DIR_PATH',
+        default="",
+        description='Source directory to organize'
+    )
+
+    bpy.types.Scene.yaam_gen_dest_dir = StringProperty(
+        name="YAAM org dest dir",
+        subtype='DIR_PATH',
+        default="",
+        description='Destination directory to organize'
+    )
 
     setup_preview_collections(WindowManager)
 
