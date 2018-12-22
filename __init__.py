@@ -54,7 +54,8 @@ preview_collections = {}
 class YAAMAstMgrSettings():
     def __init__(self):
         self.astMgr_settings_fname = 'yaam.json'
-        self.settings_abs_file = os.path.join(os.path.dirname(__file__),
+        self.astMgr_addon_dir = os.path.dirname(__file__)
+        self.settings_abs_file = os.path.join(self.astMgr_addon_dir,
                                               self.astMgr_settings_fname)
 
         # Add-on settings
@@ -85,6 +86,9 @@ class YAAMAstMgrSettings():
             default_assets = os.path.join(os.path.dirname(__file__), "Assets")
             if os.path.isdir(default_assets):
                 self.set_cur_assets_dir(default_assets)
+
+    def get_addon_dir(self):
+        return self.astMgr_addon_dir
 
     def get_favs(self):
         return self.astMgr_settings['favs']
@@ -953,7 +957,7 @@ def append_to_previews(pcoll, rootDir, abs_path, previews_list, idx):
 
     if os.path.isdir(abs_path):
         #load icon
-        default_icon_path = os.path.join(os.path.join(rootDir, "DefIcons"), "folder.png")
+        default_icon_path = os.path.join(os.path.join(yaam.get_addon_dir(), "DefIcons"), "folder.png")
         if default_icon_path in pcoll:
             thumb = pcoll[default_icon_path]
         else:
@@ -978,7 +982,7 @@ def append_to_previews(pcoll, rootDir, abs_path, previews_list, idx):
                 previews_list.append((abs_path, display_name, abs_path, thumb.icon_id, idx))
                 break;
         if not found:
-            default_icon_path = os.path.join(os.path.join(rootDir, "DefIcons"), "nothumbnail.png")
+            default_icon_path = os.path.join(os.path.join(yaam.get_addon_dir(), "DefIcons"), "nothumbnail.png")
             if default_icon_path in pcoll:
                 thumb = pcoll[default_icon_path]
             else:
