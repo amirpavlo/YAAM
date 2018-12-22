@@ -175,11 +175,11 @@ class YAAMAstMgrSettings(object):
 
     def get_or_create_asset_subdir(self, cat, create=False):
         category = self.translate_category(cat)
-        if category == '':
+        if not category:
             return ''
 
         cur_dir = yaam.get_cur_assets_dir()
-        if cur_dir == '':
+        if not cur_dir:
             return ''
         directory = os.path.join(yaam.get_cur_assets_dir(), category)
         if os.path.exists(directory) and not os.path.isdir(directory):
@@ -346,7 +346,7 @@ def blendAppendLinkElement(abs_path, elem_type, name, link=False):
 
 @classmethod
 def poll_general(cls, context):
-    if yaam.get_cur_selected_asset_abs_path() == '':
+    if not yaam.get_cur_selected_asset_abs_path():
         return False
     elif os.path.isdir(yaam.get_cur_selected_asset_abs_path()):
         return False
@@ -629,7 +629,7 @@ class AST_OT_import_ext(Operator):
     bl_description = "Import external format"
 
     def import_scene(self, cb):
-        if yaam.get_cur_selected_asset_abs_path() == '':
+        if not yaam.get_cur_selected_asset_abs_path():
             return {'FINISHED'}
         if os.path.isdir(yaam.get_cur_selected_asset_abs_path()):
             self.report({'ERROR'}, "Can not import a folder")
@@ -721,11 +721,11 @@ class AST_OT_add_asset(Operator):
         # make sure the structure we need is there
         directory = yaam.get_or_create_asset_subdir(
             yaam.get_cur_selected_asset_category())
-        if directory == '':
+        if not directory:
             self.report({'ERROR'}, "Couldn't create asset directory")
             return ({'CANCELLED'})
         save_name = yaam.get_save_asset_name()
-        if save_name == '':
+        if not save_name:
             self.report({'ERROR'}, "Must specify an asset name")
             return ({'CANCELLED'})
         if os.path.sep in save_name:
@@ -1047,7 +1047,7 @@ def traverse_dir(rootDir, assetDir, category_filter, asset_filter, pcoll,
         subdir = p.parts[-1]
         if (subdir.lower() == 'deficons' or subdir.lower() == 'trash'):
             continue
-        if (asset_filter != '' and fnmatch.fnmatch(subdir, asset_filter)):
+        if (asset_filter and fnmatch.fnmatch(subdir, asset_filter)):
             matched_subdir = True
         subdiradded = False
         for fname in fileList:
@@ -1058,7 +1058,7 @@ def traverse_dir(rootDir, assetDir, category_filter, asset_filter, pcoll,
                     break
             if not match_cat_filter:
                 continue
-            if asset_filter != '' and \
+            if asset_filter and \
                not fnmatch.fnmatch(fname, asset_filter) and \
                not matched_subdir:
                 continue
@@ -1081,7 +1081,7 @@ def traverse_dir(rootDir, assetDir, category_filter, asset_filter, pcoll,
 #   Check if the file matches the filter and if it doesn't ignore.
 #   populate the preview
 def build_enum_preview(pcoll, category, category_filter):
-    if yaam.get_cur_assets_dir() == '':
+    if not yaam.get_cur_assets_dir():
         return [], False
 
     if yaam.get_previous_assets_directory() == yaam.get_cur_assets_dir():
