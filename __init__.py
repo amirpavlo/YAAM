@@ -904,22 +904,22 @@ class YAAM_PT_astMgr(Panel):
 
     def add_preview(self, wm, row):
         if yaam.get_cur_selected_asset_category() == 'asset.all':
-            row.template_icon_view(wm, "astmngr_category_all",
+            row.template_icon_view(wm, "yaam_category_all",
                                    show_labels=True, scale=5)
         elif yaam.get_cur_selected_asset_category() == 'asset.blend':
-            row.template_icon_view(wm, "astmngr_category_blend",
+            row.template_icon_view(wm, "yaam_category_blend",
                                    show_labels=True, scale=5)
         elif yaam.get_cur_selected_asset_category() == 'asset.texture':
-            row.template_icon_view(wm, "astmngr_category_texture",
+            row.template_icon_view(wm, "yaam_category_texture",
                                    show_labels=True, scale=5)
         elif yaam.get_cur_selected_asset_category() == 'asset.3ds_file':
-            row.template_icon_view(wm, "astmngr_category_3ds",
+            row.template_icon_view(wm, "yaam_category_3ds",
                                    show_labels=True, scale=5)
         elif yaam.get_cur_selected_asset_category() == 'asset.fbx_file':
-            row.template_icon_view(wm, "astmngr_category_fbx",
+            row.template_icon_view(wm, "yaam_category_fbx",
                                    show_labels=True, scale=5)
         elif yaam.get_cur_selected_asset_category() == 'asset.obj_file':
-            row.template_icon_view(wm, "astmngr_category_obj",
+            row.template_icon_view(wm, "yaam_category_obj",
                                    show_labels=True, scale=5)
 
     def draw(self, context):
@@ -1098,61 +1098,61 @@ def build_enum_preview(pcoll, category, category_filter):
 
     return [], True
 
-def astmngr_hndlr_enum_previews_category_all(self, context):
+def yaam_hndlr_enum_previews_category_all(self, context):
     pcoll = preview_collections["asset_category_all"]
     new_list, changed = build_enum_preview(pcoll, '', [".blend", "*.obj", "*.fbx", "*.3ds"])
     if (changed):
-        pcoll.astmngr_category_all = new_list
-    return pcoll.astmngr_category_all
+        pcoll.yaam_category_all = new_list
+    return pcoll.yaam_category_all
 
-def astmngr_hndlr_enum_previews_category_blend(self, context):
+def yaam_hndlr_enum_previews_category_blend(self, context):
     pcoll = preview_collections["asset_category_blend"]
     new_list, changed = build_enum_preview(pcoll, 'Blend', ["*.blend"])
     if (changed):
-        pcoll.astmngr_category_blend = new_list
-    return pcoll.astmngr_category_blend
+        pcoll.yaam_category_blend = new_list
+    return pcoll.yaam_category_blend
 
-def astmngr_hndlr_enum_previews_category_obj(self, context):
+def yaam_hndlr_enum_previews_category_obj(self, context):
     pcoll = preview_collections["asset_category_obj"]
     new_list, changed = build_enum_preview(pcoll, 'Obj', ["*.obj"])
     if (changed):
-        pcoll.astmngr_category_obj = new_list
-    return pcoll.astmngr_category_obj
+        pcoll.yaam_category_obj = new_list
+    return pcoll.yaam_category_obj
 
-def astmngr_hndlr_enum_previews_category_texture(self, context):
+def yaam_hndlr_enum_previews_category_texture(self, context):
     pcoll = preview_collections["asset_category_texture"]
     new_list, changed = build_enum_preview(pcoll, 'Textures', ["*.jpg", "*.png", "*.svg", "*.bmp"])
     if (changed):
-        pcoll.astmngr_category_texture = new_list
-    return pcoll.astmngr_category_texture
+        pcoll.yaam_category_texture = new_list
+    return pcoll.yaam_category_texture
 
-def astmngr_hndlr_enum_previews_category_3ds(self, context):
+def yaam_hndlr_enum_previews_category_3ds(self, context):
     pcoll = preview_collections["asset_category_3ds"]
     new_list, changed = build_enum_preview(pcoll, '3ds', ["*.3ds"])
     if (changed):
-        pcoll.astmngr_category_3ds= new_list
-    return pcoll.astmngr_category_3ds
+        pcoll.yaam_category_3ds= new_list
+    return pcoll.yaam_category_3ds
 
-def astmngr_hndlr_enum_previews_category_fbx(self, context):
+def yaam_hndlr_enum_previews_category_fbx(self, context):
     pcoll = preview_collections["asset_category_fbx"]
     new_list, changed = build_enum_preview(pcoll, 'Fbx', ["*.fbx"])
     if (changed):
-        pcoll.astmngr_category_fbx = new_list
-    return pcoll.astmngr_category_fbx
+        pcoll.yaam_category_fbx = new_list
+    return pcoll.yaam_category_fbx
 
 def astmgr_hndlr_selected_asset(self, context):
     if yaam.get_cur_selected_asset_category() == "asset.all":
-        yaam.set_cur_selected_asset_abs_path(getattr(self, 'astmngr_category_all'))
+        yaam.set_cur_selected_asset_abs_path(getattr(self, 'yaam_category_all'))
     elif yaam.get_cur_selected_asset_category() == "asset.texture":
-        yaam.set_cur_selected_asset_abs_path(getattr(self, 'astmngr_category_texture'))
+        yaam.set_cur_selected_asset_abs_path(getattr(self, 'yaam_category_texture'))
     elif yaam.get_cur_selected_asset_category() == "asset.3ds_file":
-        yaam.set_cur_selected_asset_abs_path(getattr(self, 'astmngr_category_3ds'))
+        yaam.set_cur_selected_asset_abs_path(getattr(self, 'yaam_category_3ds'))
     elif yaam.get_cur_selected_asset_category() == "asset.fbx_file":
-        yaam.set_cur_selected_asset_abs_path(getattr(self, 'astmngr_category_fbx'))
+        yaam.set_cur_selected_asset_abs_path(getattr(self, 'yaam_category_fbx'))
     elif yaam.get_cur_selected_asset_category() == "asset.obj_file":
-        yaam.set_cur_selected_asset_abs_path(getattr(self, 'astmngr_category_obj'))
+        yaam.set_cur_selected_asset_abs_path(getattr(self, 'yaam_category_obj'))
     elif yaam.get_cur_selected_asset_category() == "asset.blend":
-        yaam.set_cur_selected_asset_abs_path(getattr(self, 'astmngr_category_blend'))
+        yaam.set_cur_selected_asset_abs_path(getattr(self, 'yaam_category_blend'))
     else:
         yaam.set_cur_selected_asset_abs_path("")
     return None
@@ -1164,76 +1164,76 @@ def astmgr_hndlr_selected_asset(self, context):
 def setup_preview_collections(mgr):
     global preview_collections
 
-    mgr.astmngr_category_dir_all = StringProperty(
+    mgr.yaam_category_dir_all = StringProperty(
         name="Folder Path",
         subtype='DIR_PATH',
         default="")
-    mgr.astmngr_category_all = EnumProperty(
-        items=astmngr_hndlr_enum_previews_category_all,
+    mgr.yaam_category_all = EnumProperty(
+        items=yaam_hndlr_enum_previews_category_all,
         update=astmgr_hndlr_selected_asset)
     pcoll = previews.new()
-    pcoll.astmngr_category_dir_all = ""
-    pcoll.astmngr_category_all = ()
+    pcoll.yaam_category_dir_all = ""
+    pcoll.yaam_category_all = ()
     preview_collections["asset_category_all"] = pcoll
 
-    mgr.astmngr_category_dir_blend = StringProperty(
+    mgr.yaam_category_dir_blend = StringProperty(
         name="Folder Path",
         subtype='DIR_PATH',
         default="")
-    mgr.astmngr_category_blend = EnumProperty(
-        items=astmngr_hndlr_enum_previews_category_blend,
+    mgr.yaam_category_blend = EnumProperty(
+        items=yaam_hndlr_enum_previews_category_blend,
         update=astmgr_hndlr_selected_asset)
     pcoll = previews.new()
-    pcoll.astmngr_category_dir_blend = ""
-    pcoll.astmngr_category_blend = ()
+    pcoll.yaam_category_dir_blend = ""
+    pcoll.yaam_category_blend = ()
     preview_collections["asset_category_blend"] = pcoll
 
-    mgr.astmngr_category_dir_obj = StringProperty(
+    mgr.yaam_category_dir_obj = StringProperty(
         name="Folder Path",
         subtype='DIR_PATH',
         default="")
-    mgr.astmngr_category_obj = EnumProperty(
-        items=astmngr_hndlr_enum_previews_category_obj,
+    mgr.yaam_category_obj = EnumProperty(
+        items=yaam_hndlr_enum_previews_category_obj,
         update=astmgr_hndlr_selected_asset)
     pcoll = previews.new()
-    pcoll.astmngr_category_dir_obj = ""
-    pcoll.astmngr_category_obj = ()
+    pcoll.yaam_category_dir_obj = ""
+    pcoll.yaam_category_obj = ()
     preview_collections["asset_category_obj"] = pcoll
 
-    mgr.astmngr_category_dir_3ds = StringProperty(
+    mgr.yaam_category_dir_3ds = StringProperty(
         name="Folder Path",
         subtype='DIR_PATH',
         default="")
-    mgr.astmngr_category_3ds = EnumProperty(
-        items=astmngr_hndlr_enum_previews_category_3ds,
+    mgr.yaam_category_3ds = EnumProperty(
+        items=yaam_hndlr_enum_previews_category_3ds,
         update=astmgr_hndlr_selected_asset)
     pcoll = previews.new()
-    pcoll.astmngr_category_dir_3ds = ""
-    pcoll.astmngr_category_3ds = ()
+    pcoll.yaam_category_dir_3ds = ""
+    pcoll.yaam_category_3ds = ()
     preview_collections["asset_category_3ds"] = pcoll
 
-    mgr.astmngr_category_dir_fbx = StringProperty(
+    mgr.yaam_category_dir_fbx = StringProperty(
         name="Folder Path",
         subtype='DIR_PATH',
         default="")
-    mgr.astmngr_category_fbx = EnumProperty(
-        items=astmngr_hndlr_enum_previews_category_fbx,
+    mgr.yaam_category_fbx = EnumProperty(
+        items=yaam_hndlr_enum_previews_category_fbx,
         update=astmgr_hndlr_selected_asset)
     pcoll = previews.new()
-    pcoll.astmngr_category_dir_fbx = ""
-    pcoll.astmngr_category_fbx = ()
+    pcoll.yaam_category_dir_fbx = ""
+    pcoll.yaam_category_fbx = ()
     preview_collections["asset_category_fbx"] = pcoll
 
-    mgr.astmngr_category_dir_texture = StringProperty(
+    mgr.yaam_category_dir_texture = StringProperty(
         name="Folder Path",
         subtype='DIR_PATH',
         default="")
-    mgr.astmngr_category_texture = EnumProperty(
-        items=astmngr_hndlr_enum_previews_category_texture,
+    mgr.yaam_category_texture = EnumProperty(
+        items=yaam_hndlr_enum_previews_category_texture,
         update=astmgr_hndlr_selected_asset)
     pcoll = previews.new()
-    pcoll.astmngr_category_dir_texture = ""
-    pcoll.astmngr_category_texture = ()
+    pcoll.yaam_category_dir_texture = ""
+    pcoll.yaam_category_texture = ()
     preview_collections["asset_category_texture"] = pcoll
 
 def register():
