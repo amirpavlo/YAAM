@@ -80,6 +80,12 @@ class YAAMAstMgrSettings():
             f.write(json.dumps(self.astMgr_settings, ensure_ascii=False))
             f.close()
 
+        if self.get_cur_assets_dir() == '':
+            # try and find the default assets dir
+            default_assets = os.path.join(os.path.dirname(__file__), "Assets")
+            if os.path.isdir(default_assets):
+                self.set_cur_assets_dir(default_assets)
+
     def get_favs(self):
         return self.astMgr_settings['favs']
     def set_favs(self, e):
