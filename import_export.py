@@ -14,7 +14,11 @@ png_render_filepath = argv[2]
 camera_obj = None
 
 for obj in bpy.context.scene.objects:
+<<<<<<< HEAD
     if obj.type != 'CAMERA':
+=======
+    if obj.type != 'CAMERA'
+>>>>>>> efb802e8aff404ebf1f1a7ce37715bd66bafab3a
         obj.select_set(True)
     else:
         camera_obj = obj
