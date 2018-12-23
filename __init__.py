@@ -23,6 +23,7 @@ import bpy
 import pathlib
 import glob
 import shutil
+import subprocess
 from gpu_extras.batch import batch_for_shader
 import os
 import fnmatch
@@ -63,11 +64,14 @@ class YAAMAstMgrSettings(object):
             'previous_assets_directory': "",
             'cur_selected_asset_category': "",
             'cur_selected_asset_abs_path': "",
-            'cur_assets_filter': "",
+            'cur_assets_filter' : "",
             'cur_blend_import_op': "",
-            'cur_selected_asset_mode': "astmgrmode.browse_assets",
+            'cur_selected_asset_mode' : "astmgrmode.browse_assets",
             'save_asset_dir': "",
             'save_asset_name': "",
+            'org_src_dir': "",
+            'org_dst_dir': "",
+            'blender_bin_path': "",
         }
 
         self.supported_img_formats = ['jpg', 'jpeg', 'png', 'svg', 'bmp']
@@ -166,6 +170,24 @@ class YAAMAstMgrSettings(object):
         self.astMgr_settings['save_asset_dir'] = val
         self.write_settings()
 
+    def get_org_src_dir(self):
+        return self.astMgr_settings['org_src_dir']
+    def set_org_src_dir(self, val):
+        self.astMgr_settings['org_src_dir'] = val
+        self.write_settings()
+
+    def get_org_dst_dir(self):
+        return self.astMgr_settings['org_dst_dir']
+    def set_org_dst_dir(self, val):
+        self.astMgr_settings['org_dst_dir'] = val
+        self.write_settings()
+
+    def get_blender_bin_path(self):
+        return self.astMgr_settings['blender_bin_path']
+    def set_blender_bin_path(self, val):
+        self.astMgr_settings['blender_bin_path'] = val
+        self.write_settings()
+
     def write_settings(self):
         with open(self.settings_abs_file, 'w') as f:
             json.dump(self.astMgr_settings, f, ensure_ascii=False)
@@ -238,6 +260,9 @@ def update_filter(self, context):
     yaam.set_previous_assets_directory("")
     return None
 
+def update_blender_bin_path(self, context):
+    yaam.set_blender_bin_path(context.scene.yaam_blender_bin_path)
+    return None
 
 def update_save_asset_name(self, context):
     yaam.set_save_asset_name(context.scene.save_asset_name)
@@ -414,10 +439,7 @@ class YAAM_OT_AppendCollections(Operator):
                         self.collections_list[index],
                         link=link)
                 except RuntimeError as e:
-                    if hasattr(e, 'message'):
-                        self.report({'ERROR'}, e.message)
-                    else:
-                        self.report({'ERROR'}, str(e))
+                    self.report({'ERROR'}, str(e))
         return {'FINISHED'}
 
 class YAAM_OT_AppendMaterials(Operator):
@@ -466,10 +488,7 @@ class YAAM_OT_AppendMaterials(Operator):
                         self.materials_list[index],
                         link=link)
                 except RuntimeError as e:
-                    if hasattr(e, 'message'):
-                        self.report({'ERROR'}, e.message)
-                    else:
-                        self.report({'ERROR'}, str(e))
+                    self.report({'ERROR'}, str(e))
         return {'FINISHED'}
 
 class YAAM_OT_AppendObjects(Operator):
@@ -518,10 +537,7 @@ class YAAM_OT_AppendObjects(Operator):
                         self.objects_list[index],
                         link=link)
                 except RuntimeError as e:
-                    if hasattr(e, 'message'):
-                        self.report({'ERROR'}, e.message)
-                    else:
-                        self.report({'ERROR'}, str(e))
+                    self.report({'ERROR'}, str(e))
         return {'FINISHED'}
 
 class YAAM_OT_AppendTextures(Operator):
@@ -570,10 +586,7 @@ class YAAM_OT_AppendTextures(Operator):
                         self.textures_list[index],
                         link=link)
                 except RuntimeError as e:
-                    if hasattr(e, 'message'):
-                        self.report({'ERROR'}, e.message)
-                    else:
-                        self.report({'ERROR'}, str(e))
+                    self.report({'ERROR'}, str(e))
         return {'FINISHED'}
 
 class YAAM_OT_AppendScenes(Operator):
@@ -622,10 +635,7 @@ class YAAM_OT_AppendScenes(Operator):
                         self.scenes_list[index],
                         link=link)
                 except RuntimeError as e:
-                    if hasattr(e, 'message'):
-                        self.report({'ERROR'}, e.message)
-                    else:
-                        self.report({'ERROR'}, str(e))
+                    self.report({'ERROR'}, str(e))
         return {'FINISHED'}
 
 class YAAM_OT_import_ext(Operator):
@@ -672,7 +682,11 @@ class YAAM_OT_import_ext(Operator):
 
     def execute(self, context):
         if yaam.get_cur_selected_asset_category() == 'asset.all':
-            fname = pathlib.Path(yaam.get_cur_selected_asset_abs_path()).parts[-1]
+            cur_abs_path = yaam.get_cur_selected_asset_abs_path()
+            if not cur_abs_path:
+                self.report({'ERROR'}, "no asset selected to import")
+                return {'CANCELLED'}
+            fname = pathlib.Path(cur_abs_path).parts[-1]
             if fname.lower().endswith(tuple(yaam.get_supported_img_formats())):
                 self.import_texture()
             elif fname.lower().endswith(('.blend')):
@@ -828,6 +842,50 @@ class YAAM_OT_refresh_asset(Operator):
         yaam.set_previous_assets_directory("")
         return {'FINISHED'}
 
+class YAAM_OT_snap_iamge(Operator):
+    bl_idname = "yaam.snap_picture"
+    bl_label = "snap image"
+    bl_description = "snap an image of the current asset"
+
+    def execute(self, context):
+        abs_path = yaam.get_cur_selected_asset_abs_path()
+        if not abs_path:
+            self.report({'ERROR'}, "no asset selected.")
+            return ({'FINISHED'})
+
+        png_path = os.path.splitext(abs_path)[0]
+
+        # store original values
+        res_x = bpy.context.scene.render.resolution_x
+        res_y = bpy.context.scene.render.resolution_y
+        percentage = bpy.context.scene.render.resolution_percentage
+        engine = bpy.context.scene.render.engine
+        output = bpy.context.scene.render.filepath
+
+        # set to EEVEE
+        bpy.context.scene.render.engine = 'BLENDER_EEVEE'
+        # change the output to 128x128 100% resolution
+        bpy.context.scene.render.resolution_x = 128
+        bpy.context.scene.render.resolution_y = 128
+        bpy.context.scene.render.resolution_percentage = 100
+
+        bpy.context.scene.render.filepath = png_path+".png"
+        # Save the image and the file in the blend asset directory
+        bpy.ops.render.render(write_still=True)
+
+        # restore original values
+        bpy.context.scene.render.resolution_x = res_x
+        bpy.context.scene.render.resolution_y = res_y
+        bpy.context.scene.render.resolution_percentage = percentage
+        bpy.context.scene.render.engine = engine
+        bpy.context.scene.render.filepath = output
+
+        self.report({'INFO'}, "Image snapped successfully")
+        # force an update by setting the previous assets directory to ''
+        # This way when we check it while building, we'll continue to build
+        # there by the filter taking effect
+        yaam.set_previous_assets_directory("")
+        return {'FINISHED'}
 
 def asset_type_handler(self, context):
     yaam.set_cur_selected_asset_category(self.asset_type_dropdown)
@@ -891,15 +949,15 @@ class YAAM_OT_organize(Operator):
     bl_label = "Organize"
     bl_description = "Organize assets"
 
-    def __init__():
+    def __init__(self):
         self.src = ''
         self.dst = ''
 
     def get_fnames(self, dirName, fname):
         subdir = dirName.replace(self.src, '')
-        old_fname = os.join(dirName, fname)
+        old_fname = os.path.join(dirName, fname)
         new_fname = ''
-        if subdir != '':
+        if subdir:
             new_subdir = os.path.join(self.dst, sudir)
             os.makedirs(new_subdir, exist_ok=True)
             new_fname = os.path.join(new_subdir, fname)
@@ -908,40 +966,49 @@ class YAAM_OT_organize(Operator):
 
         return old_fname, new_fname
 
-
-    def do_import_export(selfi, file_type, obj_path, png_render_path)
+    def do_import_export(self, file_type, obj_path, png_render_path):
         helperPyPath = os.path.join(yaam.get_addon_dir(), "import_export.py")
-        rc = subprocess.call(["blender -b -P"], [helperPyPath], ["--"],
-                             [obj_path], [file_type], [png_render_path])
-        if (rc != 0):
-            self.report({'ERROR'}, "Organize operation failed")
-            return ''
+        b3d = yaam.get_blender_bin_path()
+        if not b3d:
+            b3d = "blender"
+        try:
+            cmd = b3d+" -b -P "+helperPyPath+" -- "+obj_path+" "+file_type+" "+\
+                  png_render_path
+            print(cmd)
+            subprocess.call([cmd])
+        except FileNotFoundError as e:
+            self.report({'ERROR'}, str(e))
 
 
     def handle_blend(self, dirName, fname):
-        # Blend files are opened
-        #   main active cameras used to generate image
-        #   blend file copied to destination
+        old_fname, new_fname = self.get_fnames(dirName, fname)
+        helperPyPath = os.path.join(yaam.get_addon_dir(), "blend_organize.py")
+        png_path = os.path.splitext(new_fname)[0]+".png"
+        b3d = yaam.get_blender_bin_path()
+        if not b3d:
+            b3d = "blender"
+        try:
+            cmd = b3d+" "+old_fname+" -b -P "+helperPyPath+" -- "+old_fname+" "+png_path
+            print(cmd)
+            #subprocess.call([cmd])
+        except FileNotFoundError as e:
+            self.report({'ERROR'}, str(e))
+        shutil.copy2(old_fname, new_fname)
+
+    def handle_common(self, dirName, fname, file_type):
+        old_fname, new_fname = self.get_fnames(dirName, fname)
+        if not old_fname or not new_fname:
+            self.report({'ERROR'}, "Failed to copy "+file_type+" file")
+            return ({'CANCELLED'})
+        png_path = os.path.splitext(new_fname)[0]+".png"
+        self.do_import_export(file_type, old_fname, png_path)
+        shutil.copy2(old_fname, new_fname)
 
     def handle_obj(self, dirName, fname):
-        old_fname, new_fname = self.get_fnames(dirName, fname)
-        blend = self.createNewBlend()
-        if blend == '':
-            return ({'CANCELLED'})
-
-        with bpy.data.libraries.load(blend) as (data_from, data_to):
-            for obj in data_from.objects:
-                if obj.type != 'CAMERA'
-                    obj.select_set(True)
-            bpy.ops.object.delete()
-        #   all objects are deleted except for camera
-        #   imported into temp blender file
-        #   image generated
-        #   obj file and image are copied to destination dir
+        handle_common(dirName, fname, 'obj')
 
     def handle_fbx(self, dirName, fname):
-        # Fbx files are treated the same way as obj files
-        #
+        handle_common(dirName, fname, 'fbx')
 
     def handle_img(self, dirName, fname):
         # Texture files can just be copied over
@@ -954,8 +1021,14 @@ class YAAM_OT_organize(Operator):
         dst = self.dst
 
         # first some sanity checks
-        if not os.path.isdir(src) or not os.path.isdir(dst):
-            self.report({'ERROR'}, "src or dest paths are not valid")
+        if not os.path.isdir(src):
+            self.report({'ERROR'}, "src path is not valid")
+            return ({'CANCELLED'})
+
+        if not os.path.exists(dst):
+            os.makedirs(dst, exist_ok=True)
+        elif not os.path.isdir(dst):
+            self.report({'ERROR'}, "dst path is not valid")
             return ({'CANCELLED'})
 
         # walk each file in the src dir
@@ -968,21 +1041,23 @@ class YAAM_OT_organize(Operator):
                     return self.handle_obj(dirName, fname)
                 elif fname.lower().endswith("fbx"):
                     return self.handle_fbx(dirName, fname)
-                elif fname.lower().endswith(tuple(yaam.get_supported_img_formats()):
-                    return self.handle_img(dirname, fname):
+                elif fname.lower().endswith(tuple(yaam.get_supported_img_formats())):
+                    return self.handle_img(dirname, fname)
         return ({'FINISHED'})
 
     def execute(self, context):
         scn = context.scene
         self.src = scn.yaam_gen_source_dir
+        yaam.set_org_src_dir(self.src)
         self.dst = scn.yaam_gen_dest_dir
+        yaam.set_org_dst_dir(self.dst)
 
         self.organize()
 
         # force an update by setting the previous assets directory to ''
         # This way when we check it while building, we'll continue to build
         # there by the filter taking effect
-        if dst == yaam.get_cur_assets_dir():
+        if self.dst == yaam.get_cur_assets_dir():
             yaam.set_previous_assets_directory("")
         return {'FINISHED'}
 
@@ -999,6 +1074,8 @@ class YAAM_PT_astGen(Panel):
         wm = context.window_manager
         col = layout.column(align=True)
 
+        col.label(text="Blender 3D binary path:")
+        col.prop(scn, "yaam_blender_bin_path", text='')
         col.label(text="Select source folder")
         col.prop(scn, "yaam_gen_source_dir", text="")
         col.label(text="Select destination folder")
@@ -1080,6 +1157,8 @@ class YAAM_PT_astMgr(Panel):
             col.prop(scn, "save_asset_dir", text='')
             col.label(text="Save asset name:")
             col.prop(scn, "save_asset_name", text='')
+            col = layout.column(align=True)
+            col.operator('yaam.snap_picture', icon='IMAGE')
 
 
 classes = [
@@ -1095,6 +1174,7 @@ classes = [
     YAAM_OT_AppendScenes,
     YAAM_OT_import_ext,
     YAAM_OT_add_asset,
+    YAAM_OT_snap_iamge,
     YAAM_OT_rm_asset,
     YAAM_OT_refresh_asset,
     YAAM_OT_AddToFav,
@@ -1408,15 +1488,23 @@ def register():
     bpy.types.Scene.yaam_gen_source_dir = StringProperty(
         name="YAAM org source dir",
         subtype='DIR_PATH',
-        default="",
+        default=yaam.get_org_src_dir(),
         description='Source directory to organize'
     )
 
     bpy.types.Scene.yaam_gen_dest_dir = StringProperty(
         name="YAAM org dest dir",
         subtype='DIR_PATH',
-        default="",
+        default=yaam.get_org_dst_dir(),
         description='Destination directory to organize'
+    )
+
+    bpy.types.Scene.yaam_blender_bin_path = StringProperty(
+        name="Path to blender binary",
+        subtype='FILE_PATH',
+        update=update_blender_bin_path,
+        default=yaam.get_blender_bin_path(),
+        description='Path to blender binary'
     )
 
     setup_preview_collections(WindowManager)
@@ -1436,6 +1524,9 @@ def unregister():
     del bpy.types.Scene.asset_mode_list
     del bpy.types.Scene.asset_type_list
     del bpy.types.Scene.list_favorites
+    del bpy.types.Scene.yaam_gen_source_dir
+    del bpy.types.Scene.yaam_gen_dest_dir
+    del bpy.types.Scene.yaam_blender_bin_path
 
 
 if __name__ == "__main__":

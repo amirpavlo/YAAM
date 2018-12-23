@@ -14,7 +14,11 @@ png_render_filepath = argv[2]
 camera_obj = None
 
 for obj in bpy.context.scene.objects:
+<<<<<<< HEAD
     if obj.type != 'CAMERA'
+=======
+    if obj.type != 'CAMERA':
+>>>>>>> c782935... YAAM: asset-gen feature
         obj.select_set(True)
     else:
         camera_obj = obj
