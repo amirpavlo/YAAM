@@ -22,10 +22,16 @@
 import bpy
 import pathlib
 import glob
+import shutil
+from gpu_extras.batch import batch_for_shader
 import os
 import fnmatch
 import json
-from bpy.types import Panel, Operator, Menu, WindowManager
+import random
+from math import sin, cos, atan2, pi
+from mathutils import Vector, Matrix
+from bpy_extras import view3d_utils, object_utils
+from bpy.types import Panel, Operator, Menu, Macro, WindowManager
 from bpy.utils import previews
 from bpy.props import EnumProperty, StringProperty, BoolVectorProperty
 
@@ -64,6 +70,8 @@ class YAAMAstMgrSettings(object):
             'save_asset_name': "",
         }
 
+        self.supported_img_formats = ['jpg', 'jpeg', 'png', 'svg', 'bmp']
+
         if os.path.exists(self.settings_abs_file):
             with open(self.settings_abs_file, 'r') as f:
                 self.astMgr_settings = json.load(f)
@@ -76,6 +84,9 @@ class YAAMAstMgrSettings(object):
             default_assets = os.path.join(os.path.dirname(__file__), "Assets")
             if os.path.isdir(default_assets):
                 self.set_cur_assets_dir(default_assets)
+
+    def get_supported_img_formats(self):
+        return self.supported_img_formats
 
     def get_addon_dir(self):
         return self.astMgr_addon_dir
@@ -190,7 +201,7 @@ class YAAMAstMgrSettings(object):
             return ''
         if not os.path.exists(directory):
             if create:
-                os.makedirs(directory)
+                os.makedirs(directory, exist_ok=True)
             else:
                 return ''
         return directory
@@ -661,10 +672,8 @@ class YAAM_OT_import_ext(Operator):
 
     def execute(self, context):
         if yaam.get_cur_selected_asset_category() == 'asset.all':
-            fname = pathlib.Path(
-                yaam.get_cur_selected_asset_abs_path()).parts[-1]
-            if fname.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp',
-                                       '.svg')):
+            fname = pathlib.Path(yaam.get_cur_selected_asset_abs_path()).parts[-1]
+            if fname.lower().endswith(tuple(yaam.get_supported_img_formats())):
                 self.import_texture()
             elif fname.lower().endswith(('.blend')):
                 self.import_blend()
@@ -882,15 +891,93 @@ class YAAM_OT_organize(Operator):
     bl_label = "Organize"
     bl_description = "Organize assets"
 
-    def organize(self, src, dst):
-        return
+    def __init__():
+        self.src = ''
+        self.dst = ''
+
+    def get_fnames(self, dirName, fname):
+        subdir = dirName.replace(self.src, '')
+        old_fname = os.join(dirName, fname)
+        new_fname = ''
+        if subdir != '':
+            new_subdir = os.path.join(self.dst, sudir)
+            os.makedirs(new_subdir, exist_ok=True)
+            new_fname = os.path.join(new_subdir, fname)
+        else:
+            new_fname = os.path.join(self.dst, fname)
+
+        return old_fname, new_fname
+
+
+    def do_import_export(selfi, file_type, obj_path, png_render_path)
+        helperPyPath = os.path.join(yaam.get_addon_dir(), "import_export.py")
+        rc = subprocess.call(["blender -b -P"], [helperPyPath], ["--"],
+                             [obj_path], [file_type], [png_render_path])
+        if (rc != 0):
+            self.report({'ERROR'}, "Organize operation failed")
+            return ''
+
+
+    def handle_blend(self, dirName, fname):
+        # Blend files are opened
+        #   main active cameras used to generate image
+        #   blend file copied to destination
+
+    def handle_obj(self, dirName, fname):
+        old_fname, new_fname = self.get_fnames(dirName, fname)
+        blend = self.createNewBlend()
+        if blend == '':
+            return ({'CANCELLED'})
+
+        with bpy.data.libraries.load(blend) as (data_from, data_to):
+            for obj in data_from.objects:
+                if obj.type != 'CAMERA'
+                    obj.select_set(True)
+            bpy.ops.object.delete()
+        #   all objects are deleted except for camera
+        #   imported into temp blender file
+        #   image generated
+        #   obj file and image are copied to destination dir
+
+    def handle_fbx(self, dirName, fname):
+        # Fbx files are treated the same way as obj files
+        #
+
+    def handle_img(self, dirName, fname):
+        # Texture files can just be copied over
+        old_fname, new_fname = self.get_fnames(dirName, fname)
+        shutil.copy2(old_fname, new_fname)
+        return ({'FINISHED'})
+
+    def organize(self):
+        src = self.src
+        dst = self.dst
+
+        # first some sanity checks
+        if not os.path.isdir(src) or not os.path.isdir(dst):
+            self.report({'ERROR'}, "src or dest paths are not valid")
+            return ({'CANCELLED'})
+
+        # walk each file in the src dir
+        for dirName, subdirList, fileList in os.walk(src):
+            # examine the file extension
+            for fname in fileList:
+                if fname.lower().endswith("blend"):
+                    return self.handle_blend(dirName, fname)
+                elif fname.lower().endswith("obj"):
+                    return self.handle_obj(dirName, fname)
+                elif fname.lower().endswith("fbx"):
+                    return self.handle_fbx(dirName, fname)
+                elif fname.lower().endswith(tuple(yaam.get_supported_img_formats()):
+                    return self.handle_img(dirname, fname):
+        return ({'FINISHED'})
 
     def execute(self, context):
         scn = context.scene
-        src = scn.yaam_gen_source_dir
-        dst = scn.yaam_gen_dest_dir
+        self.src = scn.yaam_gen_source_dir
+        self.dst = scn.yaam_gen_dest_dir
 
-        self.organize(src, dst)
+        self.organize()
 
         # force an update by setting the previous assets directory to ''
         # This way when we check it while building, we'll continue to build
@@ -1043,8 +1130,8 @@ def append_to_previews(pcoll, rootDir, abs_path, previews_list, idx):
         file_list = glob.glob(name_pattern)
         found = False
         for fname in file_list:
-            if fname.lower().endswith(('.png', '.jpg', '.jpeg')):
-                # load image
+            if fname.lower().endswith(tuple(yaam.get_supported_img_formats())):
+                #load image
                 found = True
                 if fname in pcoll:
                     thumb = pcoll[fname]
@@ -1157,8 +1244,7 @@ def yaam_hndlr_enum_previews_category_obj(self, context):
 
 def yaam_hndlr_enum_previews_category_texture(self, context):
     pcoll = preview_collections["asset_category_texture"]
-    new_list, changed = build_enum_preview(
-        pcoll, 'Textures', ["*.jpg", "*.png", "*.svg", "*.bmp"])
+    new_list, changed = build_enum_preview(pcoll, 'Textures', yaam.get_supported_img_formats())
     if (changed):
         pcoll.yaam_category_texture = new_list
     return pcoll.yaam_category_texture
