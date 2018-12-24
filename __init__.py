@@ -24,6 +24,7 @@ import pathlib
 import glob
 import shutil
 import subprocess
+import sys
 from gpu_extras.batch import batch_for_shader
 import os
 import fnmatch
@@ -49,6 +50,12 @@ bl_info = {
 # Preview collections
 preview_collections = {}
 
+OBJ_dir_name = 'Obj'
+FBX_dir_name = 'Fbx'
+TEXTURES_dir_name = 'Textures'
+BLEND_dir_name = 'Blend'
+M3DS_dir_name = '3ds'
+TRASH_dir_name = 'Trash'
 
 class YAAMAstMgrSettings(object):
     def __init__(self):
@@ -210,15 +217,15 @@ class YAAMAstMgrSettings(object):
         if cat == 'asset.all':
             return ''
         if cat == 'asset.fbx_file':
-            return 'Fbx'
+            return FBX_dir_name
         if cat == 'asset.3ds_file':
-            return '3ds'
+            return M3DS_dir_name
         if cat == 'asset.obj_file':
-            return 'Obj'
+            return OBJ_dir_name
         if cat == 'asset.blend':
-            return 'Blend'
+            return BLEND_dir_name
         if cat == 'asset.trash':
-            return 'Trash'
+            return TRASH_dir_name
         return ''
 
     def get_or_create_asset_subdir(self, cat, create=False):
@@ -407,7 +414,7 @@ def invoke_general(self, context, event):
 
 class YAAM_OT_AppendCollections(Operator):
     bl_idname = "astblend.append_collections"
-    bl_label = "Append Collections"
+    bl_label = "Collections"
     bl_description = "Append collections from a blend library"
 
     selection: BoolVectorProperty(size=32, options={'SKIP_SAVE'})
@@ -436,9 +443,9 @@ class YAAM_OT_AppendCollections(Operator):
             layout.prop(self, "selection", index=idx, text=const, toggle=False)
 
     def execute(self, context):
+        bpy.ops.view3d.snap_selected_to_cursor()
         for index, flag in enumerate(self.selection):
             if flag:
-                bpy.ops.view3d.snap_selected_to_cursor()
                 createAndSetImportCollection()
                 link = False
                 if yaam.get_cur_blend_import_op() == 'link':
@@ -455,7 +462,7 @@ class YAAM_OT_AppendCollections(Operator):
 
 class YAAM_OT_AppendMaterials(Operator):
     bl_idname = "astblend.append_materials"
-    bl_label = "Append Materials"
+    bl_label = "Materials"
     bl_description = "Append materials from a blend library"
 
     selection: BoolVectorProperty(size=32, options={'SKIP_SAVE'})
@@ -484,9 +491,9 @@ class YAAM_OT_AppendMaterials(Operator):
             layout.prop(self, "selection", index=idx, text=const, toggle=False)
 
     def execute(self, context):
+        bpy.ops.view3d.snap_selected_to_cursor()
         for index, flag in enumerate(self.selection):
             if flag:
-                bpy.ops.view3d.snap_selected_to_cursor()
                 createAndSetImportCollection()
                 link = False
                 if yaam.get_cur_blend_import_op() == 'link':
@@ -504,7 +511,7 @@ class YAAM_OT_AppendMaterials(Operator):
 
 class YAAM_OT_AppendObjects(Operator):
     bl_idname = "astblend.append_objects"
-    bl_label = "Append Objects"
+    bl_label = "Objects"
     bl_description = "Append objects from a blend library"
 
     selection: BoolVectorProperty(size=32, options={'SKIP_SAVE'})
@@ -533,9 +540,9 @@ class YAAM_OT_AppendObjects(Operator):
             layout.prop(self, "selection", index=idx, text=const, toggle=False)
 
     def execute(self, context):
+        bpy.ops.view3d.snap_selected_to_cursor()
         for index, flag in enumerate(self.selection):
             if flag:
-                bpy.ops.view3d.snap_selected_to_cursor()
                 createAndSetImportCollection()
                 link = False
                 if yaam.get_cur_blend_import_op() == 'link':
@@ -553,7 +560,7 @@ class YAAM_OT_AppendObjects(Operator):
 
 class YAAM_OT_AppendTextures(Operator):
     bl_idname = "astblend.append_textures"
-    bl_label = "Append Textures"
+    bl_label = "Textures"
     bl_description = "Append textures from a blend library"
 
     selection: BoolVectorProperty(size=32, options={'SKIP_SAVE'})
@@ -582,9 +589,9 @@ class YAAM_OT_AppendTextures(Operator):
             layout.prop(self, "selection", index=idx, text=const, toggle=False)
 
     def execute(self, context):
+        bpy.ops.view3d.snap_selected_to_cursor()
         for index, flag in enumerate(self.selection):
             if flag:
-                bpy.ops.view3d.snap_selected_to_cursor()
                 createAndSetImportCollection()
                 link = False
                 if yaam.get_cur_blend_import_op() == 'link':
@@ -593,7 +600,7 @@ class YAAM_OT_AppendTextures(Operator):
                 try:
                     blendAppendLinkElement(
                         yaam.get_cur_selected_asset_abs_path(),
-                        "Texture",
+                        TEXTURES_dir_name,
                         self.textures_list[index],
                         link=link)
                 except RuntimeError as e:
@@ -602,7 +609,7 @@ class YAAM_OT_AppendTextures(Operator):
 
 class YAAM_OT_AppendScenes(Operator):
     bl_idname = "astblend.append_scenes"
-    bl_label = "Append Scenes"
+    bl_label = "Scenes"
     bl_description = "Append a collection from a blend library"
 
     selection: BoolVectorProperty(size=32, options={'SKIP_SAVE'})
@@ -631,9 +638,9 @@ class YAAM_OT_AppendScenes(Operator):
             layout.prop(self, "selection", index=idx, text=const, toggle=False)
 
     def execute(self, context):
+        bpy.ops.view3d.snap_selected_to_cursor()
         for index, flag in enumerate(self.selection):
             if flag:
-                bpy.ops.view3d.snap_selected_to_cursor()
                 createAndSetImportCollection()
                 link = False
                 if yaam.get_cur_blend_import_op() == 'link':
@@ -985,7 +992,12 @@ class YAAM_OT_organize(Operator):
         new_fname = ''
         if subdir:
             new_subdir = os.path.join(self.dst, file_type, subdir)
-            os.makedirs(new_subdir, exist_ok=True)
+            try:
+                os.makedirs(new_subdir, exist_ok=True)
+            except:
+                e = sys.exc_info()[0]
+                self.report({'ERROR'}, str(e))
+                return '', ''
             new_fname = os.path.join(new_subdir, fname)
         else:
             new_fname = os.path.join(self.dst, file_type, fname)
@@ -1006,7 +1018,7 @@ class YAAM_OT_organize(Operator):
 
 
     def handle_blend(self, dirName, fname):
-        old_fname, new_fname = self.get_fnames(dirName, fname, "Blend")
+        old_fname, new_fname = self.get_fnames(dirName, fname, BLEND_dir_name)
         helperPyPath = os.path.join(yaam.get_addon_dir(), "blend_organize.py")
         png_path = os.path.splitext(new_fname)[0]+".png"
         b3d = yaam.get_blender_bin_path()
@@ -1018,6 +1030,7 @@ class YAAM_OT_organize(Operator):
             subprocess.call(cmd)
         except FileNotFoundError as e:
             self.report({'ERROR'}, str(e))
+            return
         shutil.copy2(old_fname, new_fname)
 
     def handle_common(self, dirName, fname, file_type):
@@ -1030,14 +1043,14 @@ class YAAM_OT_organize(Operator):
         shutil.copy2(old_fname, new_fname)
 
     def handle_obj(self, dirName, fname):
-        self.handle_common(dirName, fname, 'Obj')
+        self.handle_common(dirName, fname, OBJ_dir_name)
 
     def handle_fbx(self, dirName, fname):
-        self.handle_common(dirName, fname, 'Fbx')
+        self.handle_common(dirName, fname, FBX_dir_name)
 
     def handle_img(self, dirName, fname):
         # Texture files can just be copied over
-        old_fname, new_fname = self.get_fnames(dirName, fname, "Texture")
+        old_fname, new_fname = self.get_fnames(dirName, fname, TEXTURES_dir_name)
         shutil.copy2(old_fname, new_fname)
         return ({'FINISHED'})
 
@@ -1073,8 +1086,12 @@ class YAAM_OT_organize(Operator):
     def execute(self, context):
         scn = context.scene
         self.src = scn.yaam_gen_source_dir
+        if not self.src.endswith(os.path.sep):
+            self.src = self.src+os.path.sep
         yaam.set_org_src_dir(self.src)
         self.dst = scn.yaam_gen_dest_dir
+        if not self.dst.endswith(os.path.sep):
+            self.dst = self.dst+os.path.sep
         yaam.set_org_dst_dir(self.dst)
 
         self.organize()
@@ -1348,7 +1365,7 @@ def yaam_hndlr_enum_previews_category_all(self, context):
 
 def yaam_hndlr_enum_previews_category_blend(self, context):
     pcoll = preview_collections["asset_category_blend"]
-    new_list, changed = build_enum_preview(pcoll, 'Blend', ["*.blend"])
+    new_list, changed = build_enum_preview(pcoll, BLEND_dir_name, ["*.blend"])
     if (changed):
         pcoll.yaam_category_blend = new_list
         context.window_manager.yaam_category_blend = set_default_view(new_list)
@@ -1356,7 +1373,7 @@ def yaam_hndlr_enum_previews_category_blend(self, context):
 
 def yaam_hndlr_enum_previews_category_obj(self, context):
     pcoll = preview_collections["asset_category_obj"]
-    new_list, changed = build_enum_preview(pcoll, 'Obj', ["*.obj"])
+    new_list, changed = build_enum_preview(pcoll, OBJ_dir_name, ["*.obj"])
     if (changed):
         pcoll.yaam_category_obj = new_list
         context.window_manager.yaam_category_obj = set_default_view(new_list)
@@ -1364,7 +1381,8 @@ def yaam_hndlr_enum_previews_category_obj(self, context):
 
 def yaam_hndlr_enum_previews_category_texture(self, context):
     pcoll = preview_collections["asset_category_texture"]
-    new_list, changed = build_enum_preview(pcoll, 'Textures', yaam.get_supported_img_formats_match())
+    new_list, changed = build_enum_preview(pcoll, TEXTURES_dir_name,
+                            yaam.get_supported_img_formats_match())
     if (changed):
         pcoll.yaam_category_texture = new_list
         context.window_manager.yaam_category_texture = set_default_view(new_list)
@@ -1380,7 +1398,7 @@ def yaam_hndlr_enum_previews_category_3ds(self, context):
 
 def yaam_hndlr_enum_previews_category_fbx(self, context):
     pcoll = preview_collections["asset_category_fbx"]
-    new_list, changed = build_enum_preview(pcoll, 'Fbx', ["*.fbx"])
+    new_list, changed = build_enum_preview(pcoll, FBX_dir_name, ["*.fbx"])
     if (changed):
         pcoll.yaam_category_fbx = new_list
         context.window_manager.yaam_category_fbx = set_default_view(new_list)
