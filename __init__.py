@@ -76,12 +76,13 @@ class YAAMAstMgrSettings(object):
             'blender_bin_path': "",
         }
 
-        self.supported_img_formats = ['jpg', 'jpeg', 'png', 'svg', 'bmp']
+        self.supported_img_formats_match = ['*.jpg', '*.jpeg', '*.png', '*.svg', '*.bmp', '*.hdr']
+        self.supported_img_formats = ['jpg', 'jpeg', 'png', 'svg', 'bmp', 'hdr']
 
         if os.path.exists(self.settings_abs_file):
             with open(self.settings_abs_file, 'r') as f:
                 settings = json.load(f)
-                if 'version' not in settings or settings['version'] != self.version:
+                if 'version' not in settings or tuple(settings['version']) != self.version:
                     with open(self.settings_abs_file, 'w') as f:
                         json.dump(self.astMgr_settings, f, ensure_ascii=False)
                 else:
@@ -98,6 +99,9 @@ class YAAMAstMgrSettings(object):
 
     def get_supported_img_formats(self):
         return self.supported_img_formats
+
+    def get_supported_img_formats_match(self):
+        return self.supported_img_formats_match
 
     def get_addon_dir(self):
         return self.astMgr_addon_dir
@@ -550,7 +554,7 @@ class YAAM_OT_AppendObjects(Operator):
 class YAAM_OT_AppendTextures(Operator):
     bl_idname = "astblend.append_textures"
     bl_label = "Append Textures"
-    bl_description = "Append a collection from a blend library"
+    bl_description = "Append textures from a blend library"
 
     selection: BoolVectorProperty(size=32, options={'SKIP_SAVE'})
 
@@ -684,7 +688,17 @@ class YAAM_OT_import_ext(Operator):
         return self.import_scene(bpy.ops.import_scene.fbx)
 
     def import_texture(self):
-        self.report({'ERROR'}, "File type currently unsupported")
+        img_path = yaam.get_cur_selected_asset_abs_path()
+        if not img_path:
+            self.report({'ERROR'}, "No image selected")
+            return {'CANCELLED'}
+        fname = pathlib.Path(img_path).parts[-1]
+        if fname in bpy.data.images:
+            self.report({'ERROR'}, "Asset is already imported")
+            return {'CANCELLED'}
+        bpy.data.images.load(img_path)
+        bpy.data.images[fname].use_fake_user = True
+        self.report({'INFO'}, "Successfully imported imaged and set fake user")
         return {'FINISHED'}
 
     def execute(self, context):
@@ -860,6 +874,11 @@ class YAAM_OT_snap_iamge(Operator):
             self.report({'ERROR'}, "no asset selected.")
             return ({'FINISHED'})
 
+        for f in yaam.get_supported_img_formats_match():
+            if fnmatch.fnmatch(abs_path, f):
+                self.report({'ERROR'}, "Operation not allowed for images")
+                return ({'FINISHED'})
+
         png_path = os.path.splitext(abs_path)[0]
 
         # store original values
@@ -981,7 +1000,6 @@ class YAAM_OT_organize(Operator):
         try:
             cmd = [b3d, "-b", "-P", helperPyPath, "--", obj_path, file_type,
                    png_render_path]
-            print(cmd)
             subprocess.call(cmd)
         except FileNotFoundError as e:
             self.report({'ERROR'}, str(e))
@@ -989,7 +1007,6 @@ class YAAM_OT_organize(Operator):
 
     def handle_blend(self, dirName, fname):
         old_fname, new_fname = self.get_fnames(dirName, fname, "Blend")
-        print(old_fname, new_fname)
         helperPyPath = os.path.join(yaam.get_addon_dir(), "blend_organize.py")
         png_path = os.path.splitext(new_fname)[0]+".png"
         b3d = yaam.get_blender_bin_path()
@@ -998,7 +1015,6 @@ class YAAM_OT_organize(Operator):
         try:
             cmd = [b3d, old_fname, "-b", "-P", helperPyPath, "--", old_fname,
                    png_path]
-            print(cmd)
             subprocess.call(cmd)
         except FileNotFoundError as e:
             self.report({'ERROR'}, str(e))
@@ -1309,12 +1325,25 @@ def build_enum_preview(pcoll, category, category_filter):
 
     return [], True
 
+def set_default_view(new_list):
+    default = ''
+    if len(new_list):
+        default = new_list[0][0]
+        if os.path.isdir(default):
+            # find an actual asset
+            for l in new_list:
+                if not os.path.isdir(l[0]):
+                    default = l[0]
+                    break
+    return default
+
 def yaam_hndlr_enum_previews_category_all(self, context):
     pcoll = preview_collections["asset_category_all"]
     new_list, changed = build_enum_preview(
         pcoll, '', [".blend", "*.obj", "*.fbx", "*.3ds"])
     if (changed):
         pcoll.yaam_category_all = new_list
+        context.window_manager.yaam_category_all = set_default_view(new_list)
     return pcoll.yaam_category_all
 
 def yaam_hndlr_enum_previews_category_blend(self, context):
@@ -1322,6 +1351,7 @@ def yaam_hndlr_enum_previews_category_blend(self, context):
     new_list, changed = build_enum_preview(pcoll, 'Blend', ["*.blend"])
     if (changed):
         pcoll.yaam_category_blend = new_list
+        context.window_manager.yaam_category_blend = set_default_view(new_list)
     return pcoll.yaam_category_blend
 
 def yaam_hndlr_enum_previews_category_obj(self, context):
@@ -1329,13 +1359,15 @@ def yaam_hndlr_enum_previews_category_obj(self, context):
     new_list, changed = build_enum_preview(pcoll, 'Obj', ["*.obj"])
     if (changed):
         pcoll.yaam_category_obj = new_list
+        context.window_manager.yaam_category_obj = set_default_view(new_list)
     return pcoll.yaam_category_obj
 
 def yaam_hndlr_enum_previews_category_texture(self, context):
     pcoll = preview_collections["asset_category_texture"]
-    new_list, changed = build_enum_preview(pcoll, 'Textures', yaam.get_supported_img_formats())
+    new_list, changed = build_enum_preview(pcoll, 'Textures', yaam.get_supported_img_formats_match())
     if (changed):
         pcoll.yaam_category_texture = new_list
+        context.window_manager.yaam_category_texture = set_default_view(new_list)
     return pcoll.yaam_category_texture
 
 def yaam_hndlr_enum_previews_category_3ds(self, context):
@@ -1343,6 +1375,7 @@ def yaam_hndlr_enum_previews_category_3ds(self, context):
     new_list, changed = build_enum_preview(pcoll, '3ds', ["*.3ds"])
     if (changed):
         pcoll.yaam_category_3ds= new_list
+        context.window_manager.yaam_category_3ds = set_default_view(new_list)
     return pcoll.yaam_category_3ds
 
 def yaam_hndlr_enum_previews_category_fbx(self, context):
@@ -1350,6 +1383,7 @@ def yaam_hndlr_enum_previews_category_fbx(self, context):
     new_list, changed = build_enum_preview(pcoll, 'Fbx', ["*.fbx"])
     if (changed):
         pcoll.yaam_category_fbx = new_list
+        context.window_manager.yaam_category_fbx = set_default_view(new_list)
     return pcoll.yaam_category_fbx
 
 
