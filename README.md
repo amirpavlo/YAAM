@@ -1,6 +1,3 @@
-# YAAM
-A blender Asset Manager developed as part of the open movie project (openmovie.org)
-
 # YAAM Inception
 YAAM is a simple asset manager add-on for [Blender 3D](https://www.blender.org). I'm currently working on an [open movie project](https://www.openmovie.org). It's an animated series which is developed in the open, similar to open source software. People can elect to contribute their talent to the project. I'm currently in the Research and Development phase; trying to build the 10K view of the work needed. I decided to make an approximately thirty second animated sequence with multiple shots to work out the kinks from my pipeline. The first hurdle I faced to keep this minor project organized is an asset manager. This is how YAAM was born. Yet Another Asset Manager. 
 
@@ -49,10 +46,17 @@ YAAM operates in two modes
 * Manage
 
 ## Browse
-In Browse mode, assets can be browsed and imported into the scene
+In Browse mode, assets can be browsed and imported into the scene. An obj, image or blend files can be imported into the scene by clicking on the "import" button.
+A blend asset can be appended or linked into the current scene. The following items are available to be appended or linked:
+* Collections
+* Objects
+* Textures
+* Materials
+* Scenes
 
 ## Manage
 In Manage mode, new assets can be created and added via YAAM to the asset directory specified above.
+The image of an asset file can be updated by selecting it, and then clicking on the "snap image" button. To update a specific asset, open the asset file and preform the "snap image" operation.
 
 # Graphical User Interface
 ## Manage GUI
@@ -63,3 +67,14 @@ In Manage mode, new assets can be created and added via YAAM to the asset direct
 
 ## Blend Import Specifics
 ![Blend Import](https://github.com/amirpavlo/YAAM/blob/master/Docs/YAAM_GUI3.jpg)
+
+# YAAM Organize
+YAAM provides a way to organize existing assets in order to be managed by YAAM. In the "YAAM Organize" section enter the following information
+* Path to the Blender 3D executable. If not specified, then it's assumed to be in the default executable path.
+* Source asset directory. The directory you wish YAAM to manage
+* Destination asset directory. The YAAM Managed asset directory. The top level directory must already be created. YAAM can create the rest of the subdirectories.
+
+The operation doesn't touch the source asset directory. It's up to the user to remove it.
+
+## YAAM Organize GUI
+![Blend Import](https://github.com/amirpavlo/YAAM/blob/master/Docs/YAAM_GUI4.jpg)
