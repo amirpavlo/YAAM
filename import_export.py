@@ -14,19 +14,15 @@ png_render_filepath = argv[2]
 camera_obj = None
 
 for obj in bpy.context.scene.objects:
-<<<<<<< HEAD
     if obj.type != 'CAMERA':
-=======
-    if obj.type != 'CAMERA'
->>>>>>> efb802e8aff404ebf1f1a7ce37715bd66bafab3a
         obj.select_set(True)
     else:
         camera_obj = obj
     bpy.ops.object.delete()
 
-if file_type == 'obj':
+if file_type.lower() == 'obj':
     bpy.ops.import_scene.obj(filepath=filepath)
-elif file_type == 'fbx':
+elif file_type.lower() == 'fbx':
     bpy.ops.import_scene.fbx(filepath=filepath)
 
 if camera_obj == None:

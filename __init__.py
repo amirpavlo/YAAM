@@ -931,16 +931,16 @@ class YAAM_OT_organize(Operator):
 
 # TODO: This is not right. We're forgetting to add the category to the
 # path. So we endup in the wrong place
-    def get_fnames(self, dirName, fname):
+    def get_fnames(self, dirName, fname, file_type):
         subdir = dirName.replace(self.src, '')
         old_fname = os.path.join(dirName, fname)
         new_fname = ''
         if subdir:
-            new_subdir = os.path.join(self.dst, sudir)
+            new_subdir = os.path.join(self.dst, file_type, subdir)
             os.makedirs(new_subdir, exist_ok=True)
             new_fname = os.path.join(new_subdir, fname)
         else:
-            new_fname = os.path.join(self.dst, fname)
+            new_fname = os.path.join(self.dst, file_type, fname)
 
         return old_fname, new_fname
 
@@ -951,31 +951,33 @@ class YAAM_OT_organize(Operator):
         if not b3d:
             b3d = "blender"
         try:
-            cmd = b3d+" -b -P "+helperPyPath+" -- "+obj_path+" "+file_type+" "+\
-                  png_render_path
+            cmd = [b3d, "-b", "-P", helperPyPath, "--", obj_path, file_type,
+                   png_render_path]
             print(cmd)
-            subprocess.call([cmd])
+            subprocess.call(cmd)
         except FileNotFoundError as e:
             self.report({'ERROR'}, str(e))
 
 
     def handle_blend(self, dirName, fname):
-        old_fname, new_fname = self.get_fnames(dirName, fname)
+        old_fname, new_fname = self.get_fnames(dirName, fname, "Blend")
+        print(old_fname, new_fname)
         helperPyPath = os.path.join(yaam.get_addon_dir(), "blend_organize.py")
         png_path = os.path.splitext(new_fname)[0]+".png"
         b3d = yaam.get_blender_bin_path()
         if not b3d:
             b3d = "blender"
         try:
-            cmd = b3d+" "+old_fname+" -b -P "+helperPyPath+" -- "+old_fname+" "+png_path
+            cmd = [b3d, old_fname, "-b", "-P", helperPyPath, "--", old_fname,
+                   png_path]
             print(cmd)
-            #subprocess.call([cmd])
+            subprocess.call(cmd)
         except FileNotFoundError as e:
             self.report({'ERROR'}, str(e))
         shutil.copy2(old_fname, new_fname)
 
     def handle_common(self, dirName, fname, file_type):
-        old_fname, new_fname = self.get_fnames(dirName, fname)
+        old_fname, new_fname = self.get_fnames(dirName, fname, file_type)
         if not old_fname or not new_fname:
             self.report({'ERROR'}, "Failed to copy "+file_type+" file")
             return ({'CANCELLED'})
@@ -984,14 +986,14 @@ class YAAM_OT_organize(Operator):
         shutil.copy2(old_fname, new_fname)
 
     def handle_obj(self, dirName, fname):
-        handle_common(dirName, fname, 'obj')
+        self.handle_common(dirName, fname, 'Obj')
 
     def handle_fbx(self, dirName, fname):
-        handle_common(dirName, fname, 'fbx')
+        self.handle_common(dirName, fname, 'Fbx')
 
     def handle_img(self, dirName, fname):
         # Texture files can just be copied over
-        old_fname, new_fname = self.get_fnames(dirName, fname)
+        old_fname, new_fname = self.get_fnames(dirName, fname, "Texture")
         shutil.copy2(old_fname, new_fname)
         return ({'FINISHED'})
 
@@ -1015,13 +1017,13 @@ class YAAM_OT_organize(Operator):
             # examine the file extension
             for fname in fileList:
                 if fname.lower().endswith("blend"):
-                    return self.handle_blend(dirName, fname)
+                    self.handle_blend(dirName, fname)
                 elif fname.lower().endswith("obj"):
-                    return self.handle_obj(dirName, fname)
+                    self.handle_obj(dirName, fname)
                 elif fname.lower().endswith("fbx"):
-                    return self.handle_fbx(dirName, fname)
+                    self.handle_fbx(dirName, fname)
                 elif fname.lower().endswith(tuple(yaam.get_supported_img_formats())):
-                    return self.handle_img(dirname, fname)
+                    self.handle_img(dirName, fname)
         return ({'FINISHED'})
 
     def execute(self, context):
