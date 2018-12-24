@@ -52,6 +52,7 @@ preview_collections = {}
 
 class YAAMAstMgrSettings(object):
     def __init__(self):
+        self.version = (0, 1)
         self.astMgr_settings_fname = 'yaam.json'
         self.astMgr_addon_dir = os.path.dirname(__file__)
         self.settings_abs_file = os.path.join(self.astMgr_addon_dir,
@@ -60,6 +61,7 @@ class YAAMAstMgrSettings(object):
         # Add-on settings
         self.astMgr_settings = {
             'favs': [],
+            'version': (0, 1),
             'cur_assets_dir': "",
             'previous_assets_directory': "",
             'cur_selected_asset_category': "",
@@ -78,7 +80,12 @@ class YAAMAstMgrSettings(object):
 
         if os.path.exists(self.settings_abs_file):
             with open(self.settings_abs_file, 'r') as f:
-                self.astMgr_settings = json.load(f)
+                settings = json.load(f)
+                if 'version' not in settings or settings['version'] != self.version:
+                    with open(self.settings_abs_file, 'w') as f:
+                        json.dump(self.astMgr_settings, f, ensure_ascii=False)
+                else:
+                    self.astMgr_settings = settings
         else:
             with open(self.settings_abs_file, 'w') as f:
                 json.dump(self.astMgr_settings, f, ensure_ascii=False)
