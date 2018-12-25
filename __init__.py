@@ -870,7 +870,7 @@ class YAAM_OT_refresh_asset(Operator):
         yaam.set_previous_assets_directory("")
         return {'FINISHED'}
 
-class YAAM_OT_snap_iamge(Operator):
+class YAAM_OT_snap_image(Operator):
     bl_idname = "yaam.snap_picture"
     bl_label = "snap image"
     bl_description = "snap an image of the current asset"
@@ -1216,7 +1216,7 @@ classes = [
     YAAM_OT_AppendScenes,
     YAAM_OT_import_ext,
     YAAM_OT_add_asset,
-    YAAM_OT_snap_iamge,
+    YAAM_OT_snap_image,
     YAAM_OT_rm_asset,
     YAAM_OT_refresh_asset,
     YAAM_OT_AddToFav,
@@ -1344,14 +1344,18 @@ def build_enum_preview(pcoll, category, category_filter):
 
 def set_default_view(new_list):
     default = ''
+    selected = yaam.get_cur_selected_asset_abs_path()
     if len(new_list):
         default = new_list[0][0]
         if os.path.isdir(default):
             # find an actual asset
             for l in new_list:
                 if not os.path.isdir(l[0]):
-                    default = l[0]
-                    break
+                    if not default:
+                        default = l[0]
+                    if l[0] == selected:
+                        default = l[0]
+                        break
     return default
 
 def yaam_hndlr_enum_previews_category_all(self, context):
@@ -1367,6 +1371,7 @@ def yaam_hndlr_enum_previews_category_blend(self, context):
     pcoll = preview_collections["asset_category_blend"]
     new_list, changed = build_enum_preview(pcoll, BLEND_dir_name, ["*.blend"])
     if (changed):
+        print("Setting new default")
         pcoll.yaam_category_blend = new_list
         context.window_manager.yaam_category_blend = set_default_view(new_list)
     return pcoll.yaam_category_blend
