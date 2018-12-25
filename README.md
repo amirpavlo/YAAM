@@ -78,3 +78,14 @@ The operation doesn't touch the source asset directory. It's up to the user to r
 
 ## YAAM Organize GUI
 ![Blend Import](https://github.com/amirpavlo/YAAM/blob/master/Docs/YAAM_GUI4.jpg)
+
+# Possible Future Improvements
+I wrote this add-on to help me organize the assets I download or build. As I was building a larger scene, I realized how difficult it is to have to go to the file browser every time I needed to import an asset. It really slowed down my progress. Having said that, obviously, this is not intended to be a heavy weight, fully blown digital asset manager; not at its inception anyway.
+
+Moving forward some improvements that can be added:
+
+* use a backend database to store references to assets
+* use a version manager, like GIT, to keep track of the revisions on each asset
+* support editing of assets within a blender instance. 
+* support publishing of assets
+* support network access
