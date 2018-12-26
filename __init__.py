@@ -667,7 +667,11 @@ class YAAM_OT_import_ext(Operator):
         if os.path.isdir(yaam.get_cur_selected_asset_abs_path()):
             self.report({'ERROR'}, "Can not import a folder")
             return {'FINISHED'}
-        cb(filepath=yaam.get_cur_selected_asset_abs_path())
+        try:
+            cb(filepath=yaam.get_cur_selected_asset_abs_path())
+        except:
+            self.report({'ERROR'}, "Failed to import file: ")
+            return {'FINISHED'}
         bpy.ops.view3d.snap_selected_to_cursor()
         collection_name = "imported_assets"
         c = bpy.data.collections.get(collection_name)
@@ -1256,12 +1260,13 @@ def append_to_previews(pcoll, rootDir, abs_path, previews_list, idx):
                 #load image
                 found = True
                 if fname in pcoll:
+                    pcoll[fname].reload()
                     thumb = pcoll[fname]
                 else:
                     thumb = pcoll.load(
                         fname, fname, 'IMAGE', force_reload=True)
                 previews_list.append((abs_path, display_name, abs_path,
-                                      thumb.icon_id, idx))
+                                     thumb.icon_id, idx))
                 break
         if not found:
             default_icon_path = os.path.join(os.path.join(yaam.get_addon_dir(), "DefIcons"), "nothumbnail.png")
@@ -1351,7 +1356,7 @@ def set_default_view(new_list):
             # find an actual asset
             for l in new_list:
                 if not os.path.isdir(l[0]):
-                    if not default:
+                    if not default or os.path.isdir(default):
                         default = l[0]
                     if l[0] == selected:
                         default = l[0]
@@ -1371,9 +1376,9 @@ def yaam_hndlr_enum_previews_category_blend(self, context):
     pcoll = preview_collections["asset_category_blend"]
     new_list, changed = build_enum_preview(pcoll, BLEND_dir_name, ["*.blend"])
     if (changed):
-        print("Setting new default")
         pcoll.yaam_category_blend = new_list
-        context.window_manager.yaam_category_blend = set_default_view(new_list)
+        if len(new_list):
+            context.window_manager.yaam_category_blend = set_default_view(new_list)
     return pcoll.yaam_category_blend
 
 def yaam_hndlr_enum_previews_category_obj(self, context):
