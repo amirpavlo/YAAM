@@ -1,6 +1,9 @@
 # YAAM Inception
 YAAM is a simple asset manager add-on for [Blender 3D](https://www.blender.org). I'm currently working on an [open movie project](https://www.openmovie.org). It's an animated series which is developed in the open, similar to open source software. People can elect to contribute their talent to the project. I'm currently in the Research and Development phase; trying to build the 10K view of the work needed. I decided to make an approximately thirty second animated sequence with multiple shots to work out the kinks from my pipeline. The first hurdle I faced to keep this minor project organized is an asset manager. This is how YAAM was born. Yet Another Asset Manager. 
 
+# Blender 2.8 Compatible
+YAAM supports Blender 2.8. It does not work with previous versions of Blender.
+
 # Asset Directory Structure
 There is an Asset directory, which gets installed along with the add-on, if installed from the .zip file. However, the add-on can be used to manage multiple asset directories. The list of asset directories can be stored in favourites and selected at any point in time.
 
