@@ -1369,7 +1369,8 @@ def yaam_hndlr_enum_previews_category_all(self, context):
         pcoll, '', [".blend", "*.obj", "*.fbx", "*.3ds"])
     if (changed):
         pcoll.yaam_category_all = new_list
-        context.window_manager.yaam_category_all = set_default_view(new_list)
+        if len(new_list):
+            context.window_manager.yaam_category_all = set_default_view(new_list)
     return pcoll.yaam_category_all
 
 def yaam_hndlr_enum_previews_category_blend(self, context):
@@ -1386,7 +1387,8 @@ def yaam_hndlr_enum_previews_category_obj(self, context):
     new_list, changed = build_enum_preview(pcoll, OBJ_dir_name, ["*.obj"])
     if (changed):
         pcoll.yaam_category_obj = new_list
-        context.window_manager.yaam_category_obj = set_default_view(new_list)
+        if len(new_list):
+            context.window_manager.yaam_category_obj = set_default_view(new_list)
     return pcoll.yaam_category_obj
 
 def yaam_hndlr_enum_previews_category_texture(self, context):
@@ -1395,7 +1397,8 @@ def yaam_hndlr_enum_previews_category_texture(self, context):
                             yaam.get_supported_img_formats_match())
     if (changed):
         pcoll.yaam_category_texture = new_list
-        context.window_manager.yaam_category_texture = set_default_view(new_list)
+        if len(new_list):
+            context.window_manager.yaam_category_texture = set_default_view(new_list)
     return pcoll.yaam_category_texture
 
 def yaam_hndlr_enum_previews_category_3ds(self, context):
@@ -1403,7 +1406,8 @@ def yaam_hndlr_enum_previews_category_3ds(self, context):
     new_list, changed = build_enum_preview(pcoll, '3ds', ["*.3ds"])
     if (changed):
         pcoll.yaam_category_3ds= new_list
-        context.window_manager.yaam_category_3ds = set_default_view(new_list)
+        if len(new_list):
+            context.window_manager.yaam_category_3ds = set_default_view(new_list)
     return pcoll.yaam_category_3ds
 
 def yaam_hndlr_enum_previews_category_fbx(self, context):
@@ -1411,7 +1415,8 @@ def yaam_hndlr_enum_previews_category_fbx(self, context):
     new_list, changed = build_enum_preview(pcoll, FBX_dir_name, ["*.fbx"])
     if (changed):
         pcoll.yaam_category_fbx = new_list
-        context.window_manager.yaam_category_fbx = set_default_view(new_list)
+        if len(new_list):
+            context.window_manager.yaam_category_fbx = set_default_view(new_list)
     return pcoll.yaam_category_fbx
 
 
