@@ -337,7 +337,7 @@ class YAAM_OT_RmFromFav(Operator):
 #
 
 class YAAM_MT_blend_append_menu(Menu):
-    bl_idname = "yaam.blend_append"
+    #bl_idname = "yaam.blend_MT_append"
     bl_label = "Append"
     bl_description = "Append from a blend library"
 
@@ -352,7 +352,6 @@ class YAAM_MT_blend_append_menu(Menu):
         layout.operator("astBlend.append_scenes")
 
 class YAAM_MT_blend_link_menu(Menu):
-    bl_idname = "yaam.blend_link"
     bl_label = "Link"
     bl_description = "Link from a blend library"
 
@@ -534,6 +533,8 @@ class YAAM_OT_AppendObjects(Operator):
         # open the blend file and read the objects
         # Make a list of all the objects in the file
         # Display them in the menu
+        # TODO: don't open and read the file every draw cycle. do it only
+        # once. Maybe have a flag and check if it has been set
         self.openBlendFileAndRead()
         layout = self.layout
         for idx, const in enumerate(self.objects_list):
@@ -1191,8 +1192,8 @@ class YAAM_PT_astMgr(Panel):
         row = col.row(align=False)
         if (yaam.get_cur_selected_asset_category() == 'asset.blend') and \
            (yaam.get_cur_selected_asset_mode() == 'astmgrmode.browse_assets'):
-            row.menu('yaam.blend_link', icon = 'LINKED')
-            row.menu('yaam.blend_append', icon = 'APPEND_BLEND')
+            row.menu('YAAM_MT_blend_link_menu', icon = 'LINKED')
+            row.menu('YAAM_MT_blend_append_menu', icon = 'APPEND_BLEND')
         elif (yaam.get_cur_selected_asset_category() != 'asset.blend') and \
              (yaam.get_cur_selected_asset_mode() == 'astmgrmode.browse_assets'):
             row.operator('yaam.import_ext', icon = 'IMPORT')
