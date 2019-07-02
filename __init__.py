@@ -442,7 +442,7 @@ class YAAM_OT_AppendCollections(Operator):
             layout.prop(self, "selection", index=idx, text=const, toggle=False)
 
     def execute(self, context):
-        bpy.ops.view3d.snap_selected_to_cursor()
+        bpy.ops.view3d.snap_cursor_to_center()
         for index, flag in enumerate(self.selection):
             if flag:
                 createAndSetImportCollection()
@@ -490,7 +490,7 @@ class YAAM_OT_AppendMaterials(Operator):
             layout.prop(self, "selection", index=idx, text=const, toggle=False)
 
     def execute(self, context):
-        bpy.ops.view3d.snap_selected_to_cursor()
+        bpy.ops.view3d.snap_cursor_to_center()
         for index, flag in enumerate(self.selection):
             if flag:
                 createAndSetImportCollection()
@@ -541,7 +541,7 @@ class YAAM_OT_AppendObjects(Operator):
             layout.prop(self, "selection", index=idx, text=const, toggle=False)
 
     def execute(self, context):
-        bpy.ops.view3d.snap_selected_to_cursor()
+        bpy.ops.view3d.snap_cursor_to_center()
         for index, flag in enumerate(self.selection):
             if flag:
                 createAndSetImportCollection()
@@ -590,7 +590,7 @@ class YAAM_OT_AppendTextures(Operator):
             layout.prop(self, "selection", index=idx, text=const, toggle=False)
 
     def execute(self, context):
-        bpy.ops.view3d.snap_selected_to_cursor()
+        bpy.ops.view3d.snap_cursor_to_center()
         for index, flag in enumerate(self.selection):
             if flag:
                 createAndSetImportCollection()
@@ -639,7 +639,7 @@ class YAAM_OT_AppendScenes(Operator):
             layout.prop(self, "selection", index=idx, text=const, toggle=False)
 
     def execute(self, context):
-        bpy.ops.view3d.snap_selected_to_cursor()
+        bpy.ops.view3d.snap_cursor_to_center()
         for index, flag in enumerate(self.selection):
             if flag:
                 createAndSetImportCollection()
@@ -673,7 +673,7 @@ class YAAM_OT_import_ext(Operator):
         except:
             self.report({'ERROR'}, "Failed to import file: ")
             return {'FINISHED'}
-        bpy.ops.view3d.snap_selected_to_cursor()
+        bpy.ops.view3d.snap_cursor_to_center()
         collection_name = "imported_assets"
         c = bpy.data.collections.get(collection_name)
         scene = bpy.context.scene
