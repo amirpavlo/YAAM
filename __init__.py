@@ -1112,7 +1112,7 @@ class YAAM_PT_astGen(Panel):
     bl_label = "YAAM Organize"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = 'YAAM Manager'
+    bl_category = 'YAAM'
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
@@ -1135,7 +1135,7 @@ class YAAM_PT_astMgr(Panel):
     bl_label = "YAAM"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = 'YAAM Manager'
+    bl_category = 'YAAM'
 
     def add_preview(self, wm, row):
         if yaam.get_cur_selected_asset_category() == 'asset.all':
