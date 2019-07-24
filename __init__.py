@@ -1286,6 +1286,7 @@ def append_to_previews(pcoll, rootDir, abs_path, previews_list, idx):
 #   which matches the filters provided
 def traverse_dir(rootDir, assetDir, category_filter, asset_filter, pcoll,
                  cb_fn):
+    print(asset_filter)
     i = 0
     previews_list = []
     for dirName, subdirList, fileList in os.walk(assetDir):
@@ -1294,7 +1295,7 @@ def traverse_dir(rootDir, assetDir, category_filter, asset_filter, pcoll,
         subdir = p.parts[-1]
         if (subdir.lower() == 'deficons' or subdir.lower() == 'trash'):
             continue
-        if (asset_filter and fnmatch.fnmatch(subdir, asset_filter)):
+        if (asset_filter and fnmatch.fnmatch(subdir.lower(), asset_filter.lower())):
             matched_subdir = True
         subdiradded = False
         for fname in fileList:
@@ -1306,7 +1307,7 @@ def traverse_dir(rootDir, assetDir, category_filter, asset_filter, pcoll,
             if not match_cat_filter:
                 continue
             if asset_filter and \
-               not fnmatch.fnmatch(fname, asset_filter) and \
+               not fnmatch.fnmatch(fname.lower(), asset_filter.lower()) and \
                not matched_subdir:
                 continue
             # matched a subdirectory
